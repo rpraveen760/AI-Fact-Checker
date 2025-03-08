@@ -1,0 +1,51 @@
+<rail version="0.1">
+    <!-- 
+      Prompt Section:
+      This is required. It tells the LLM how to respond.
+    -->
+    <prompt>
+        You are a fact-checking agent. The user provides a claim.
+        We have a verified_fact, bias_score, misinformation_risk, final_verdict,
+        and actual_truth to ensure accurate fact-checking.
+        Return a JSON-like response that fits the schema below.
+    </prompt>
+
+    <!-- Output Section: Defines the structure of the final response -->
+    <output>
+        <object name="fact_check_response" strict="false">
+
+            <string
+                name="verified_fact"
+                description="The retrieved fact that supports or contradicts the claim."
+            />
+            <string
+                name="bias_score"
+                description="Bias classification: Neutral, Biased, or Unacceptable."
+            />
+            <string
+                name="misinformation_risk"
+                description="Risk level: Low, Medium, or High."
+            />
+            <string
+                name="final_verdict"
+                description="Final decision: True, Misleading, or Fake."
+            />
+        </object>
+    </output>
+
+    <!-- Validation Section: optional <validate> blocks -->
+    <validate name="fact_consistency">
+        <when>verified_fact != ""</when>
+        <error>Retrieved fact is empty or missing.</error>
+    </validate>
+
+    <validate name="bias_filter">
+        <when>bias_score != "Unacceptable"</when>
+        <error>Response contains extreme bias.</error>
+    </validate>
+
+    <validate name="misinfo_check">
+        <when>misinformation_risk != "High"</when>
+        <error>Detected high-risk misinformation.</error>
+    </validate>
+</rail>
